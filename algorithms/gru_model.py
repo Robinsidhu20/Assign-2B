@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as n
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
