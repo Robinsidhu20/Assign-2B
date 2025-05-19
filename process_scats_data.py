@@ -2,8 +2,8 @@ import pandas as pd
 from datetime import timedelta
 
 # === File paths ===
-TRAFFIC_DATA = "C:/Swinburne/Intro to AI/2B/Scats Data October 2006/Scats Data October 2006.csv" #Change as per your own specified location
-GEO_DATA = "C:/Swinburne/Intro to AI/2B/Traffic_Count_Locations_with_LONG_LAT.csv" #Change as per your own specified location
+TRAFFIC_DATA = "Scats Data October 2006/Scats Data October 2006.csv" #Change as per your own specified location
+GEO_DATA = "Traffic_Count_Locations_with_LONG_LAT.csv" #Change as per your own specified location
 
 # === Load SCATS traffic data ===
 df = pd.read_csv(TRAFFIC_DATA)
@@ -54,8 +54,8 @@ geo_df = geo_df.rename(columns={
 })
 
 # Normalize Site_IDs with padding
-geo_df["Site_ID"] = geo_df["Site_ID"].astype(str).str.zfill(4)
-df_long["Site_ID"] = df_long["Site_ID"].astype(str).str.zfill(4)
+geo_df["Site_ID"] = geo_df["Site_ID"].astype(str).str.lstrip('0')
+df_long["Site_ID"] = df_long["Site_ID"].astype(str).str.lstrip('0')
 
 # Merge
 df_long = df_long.merge(
@@ -65,12 +65,12 @@ df_long = df_long.merge(
 
 # For Machine Learning Team (model-ready)
 df_model = df_long[["Site_ID", "Location", "Latitude", "Longitude", "Timestamp", "Volume"]]
-df_model.to_csv("C:/Swinburne/Intro to AI/2B/Processed Data/traffic_model_ready.csv", index=False) #Change as per your own specified location
-df_model.to_pickle("C:/Swinburne/Intro to AI/2B/Processed Data/traffic_model_ready.pkl") #Change as per your own specified location
+df_model.to_csv("Processed Data/traffic_model_ready.csv", index=False) #Change as per your own specified location
+df_model.to_pickle("Processed Data/traffic_model_ready.pkl") #Change as per your own specified location
 print("Saved: traffic_model_ready.csv and .pkl (model-ready dataset)")
 
 # For Visualization/EDA Team (with geo info)
 df_geo = df_long.copy()
-df_geo.to_csv("C:/Swinburne/Intro to AI/2B/Processed Data/traffic_with_geo.csv", index=False) #Change as per your own specified location
-df_geo.to_pickle("C:/Swinburne/Intro to AI/2B/Processed Data/traffic_with_geo.pkl") #Change as per your own specified location
+df_geo.to_csv("Processed Data/traffic_with_geo.csv", index=False) #Change as per your own specified location
+df_geo.to_pickle("Processed Data/traffic_with_geo.pkl") #Change as per your own specified location
 print("Saved: traffic_with_geo.csv and .pkl (with location metadata)")
