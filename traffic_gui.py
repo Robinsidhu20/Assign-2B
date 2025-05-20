@@ -7,15 +7,15 @@ import networkx as nx
 from io import StringIO
 
 # === Load processed data with geo ===
-data_path = "C:/Swinburne/Intro to AI/2B/Processed Data/traffic_with_geo.csv"  
+data_path = "Processed Data/scats_complete_average.csv"  
 df = pd.read_csv(data_path)
 
 # Drop rows without geo info
-df = df.dropna(subset=["Geo_Latitude", "Geo_Longitude"])
+df = df.dropna(subset=["Latitude", "Longitude"])
 
 # Get unique sites with lat/lon
 site_info = df.drop_duplicates(subset="Site_ID")[[
-    "Site_ID", "Location", "Geo_Latitude", "Geo_Longitude"
+    "Site_ID", "Location", "Latitude", "Longitude"
 ]].reset_index(drop=True)
 
 # === Sidebar controls ===
@@ -31,16 +31,16 @@ model_choice = st.sidebar.selectbox("Select Prediction Model", [
 show_path = st.sidebar.button("Calculate Shortest Path")
 
 # === Create map ===
-center_lat = site_info["Geo_Latitude"].astype(float).mean()
-center_lon = site_info["Geo_Longitude"].astype(float).mean()
+center_lat = site_info["Latitude"].astype(float).mean()
+center_lon = site_info["Longitude"].astype(float).mean()
 
 m = folium.Map(location=[center_lat, center_lon], zoom_start=12)
 
 # Add all site markers
 for _, row in site_info.iterrows():
     Marker(
-        location=[row["Geo_Latitude"], row["Geo_Longitude"]],
-        popup=f"{row['Site_ID']} - {row['Location']}",
+        location=[row["Latitude"], row["Longitude"]],
+        popup=f"{row['Site_ID']} - {row['Location']} - {row["Latitude"]}, {row["Longitude"]}",
         icon=folium.Icon(color='blue', icon='info-sign')
     ).add_to(m)
 
@@ -48,13 +48,13 @@ for _, row in site_info.iterrows():
 # In real use: Load predicted travel times as weights
 G = nx.Graph()
 for _, row in site_info.iterrows():
-    G.add_node(row["Site_ID"], pos=(row["Geo_Latitude"], row["Geo_Longitude"]))
+    G.add_node(row["Site_ID"], pos=(row["Latitude"], row["Longitude"]))
 
 # Connect each site to 5 nearest neighbors (just for demo)
 from sklearn.neighbors import NearestNeighbors
 import numpy as np
 
-coords = site_info[["Geo_Latitude", "Geo_Longitude"]].astype(float).to_numpy()
+coords = site_info[["Latitude", "Longitude"]].astype(float).to_numpy()
 nbrs = NearestNeighbors(n_neighbors=6, algorithm='ball_tree').fit(coords)
 distances, indices = nbrs.kneighbors(coords)
 
@@ -74,8 +74,8 @@ if show_path:
         path = nx.shortest_path(G, source=start_site, target=end_site, weight="weight")
         path_coords = [
             (
-                float(site_info[site_info["Site_ID"] == sid]["Geo_Latitude"].values[0]),
-                float(site_info[site_info["Site_ID"] == sid]["Geo_Longitude"].values[0])
+                float(site_info[site_info["Site_ID"] == sid]["Latitude"].values[0]),
+                float(site_info[site_info["Site_ID"] == sid]["Longitude"].values[0])
             ) for sid in path
         ]
 
@@ -86,4 +86,4 @@ if show_path:
         st.error(f"Error calculating path: {e}")
 
 # === Display the map ===
-st_data = st_folium(m, width=700, height=500)
+st_data = st_folium(m, width=1400, height=800)
